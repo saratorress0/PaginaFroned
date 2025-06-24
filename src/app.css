@@ -1,0 +1,51 @@
+/* src/App.css */
+
+body {
+    margin: 0;
+    font-family: 'Georgia', serif;
+    background-color: #fdfaf6;
+    color: #2e2e2e;
+  }
+  
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    background-color: #f5f0e8;
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  nav a {
+    margin: 0 1rem;
+    transition: color 0.2s ease;
+  }
+  
+  nav a:hover {
+    color: #7b6f5d;
+  }
+  
+  main {
+    padding: 4rem 6rem;
+  }
+  
+  h1, h2 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  footer {
+    padding: 2rem 3rem;
+    text-align: center;
+    background-color: #eee9df;
+    margin-top: 4rem;
+    font-size: 0.9rem;
+  }
+  
