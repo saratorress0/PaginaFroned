@@ -26,8 +26,7 @@ function Contact() {
     }
 
     const nuevoContacto = {
-      name: form.name,
-      number: form.email,  // si no usas "number", elimínalo del backend también
+      name: form.name,  
       email: form.email,
       subject: form.subject,
       message: form.message
