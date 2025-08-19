@@ -1,7 +1,6 @@
-// src/users.js
 export const usuarios = [
-    { username: 'juan', password: '1234', rol: 'estudiantes' },
-    { username: 'maria', password: 'abcd', rol: 'profesores' },
+    { username: 'juan', password: 'A$9kLm!7Zq', rol: 'estudiante' },
+    { username: 'maria', password: 'abcd', rol: 'profesor' },
     { username: 'admin', password: 'admin', rol: 'administrador' },
   ];
   

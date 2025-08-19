@@ -24,15 +24,33 @@ function Botones() {
 
   const manejarLogin = (e) => {
     e.preventDefault();
+    const rolMap = {
+      estudiantes: 'estudiante',
+      profesores: 'profesor',
+      administrador: 'administrador',
+    };
+    
+    const rolBuscado = rolMap[usuarioSeleccionado.toLowerCase()] || usuarioSeleccionado.toLowerCase();
+    
     const usuarioValido = usuarios.find(
       (u) =>
         u.username === username &&
         u.password === password &&
-        u.rol.toLowerCase() === usuarioSeleccionado.toLowerCase()
+        u.rol.toLowerCase() === rolBuscado
     );
+    
 
     if (usuarioValido) {
-      alert(`Bienvenido ${usuarioValido.username} (${usuarioValido.rol})`);
+      
+      if (usuarioValido.rol.toLowerCase() === "estudiante") {
+        window.location.href = "/estudiante.html";
+      } else if (usuarioValido.rol.toLowerCase() === "profesor") {
+        window.location.href = "/profesor.html";
+      } else if (usuarioValido.rol.toLowerCase() === "administrador") {
+        window.location.href = "/admin.html";
+      } else {
+        alert(`Bienvenido ${usuarioValido.username} (${usuarioValido.rol})`);
+      }
       cerrarModal();
     } else {
       setError("Usuario o contraseña incorrectos para este rol.");
@@ -49,13 +67,13 @@ function Botones() {
           Profesores
         </button>
         <button className="boton" onClick={() => manejarClick("administrador")}>
-          Administratador
+          Administrador
         </button>
       </div>
 
       {mostrarModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay" onClick={cerrarModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <span className="cerrar-modal" onClick={cerrarModal}>
               &times;
             </span>
@@ -66,12 +84,14 @@ function Botones() {
                 placeholder="Usuario"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                required
               />
               <input
                 type="password"
                 placeholder="Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
               {error && <p className="error">{error}</p>}
               <button type="submit" className="boton">
@@ -86,4 +106,3 @@ function Botones() {
 }
 
 export default Botones;
-

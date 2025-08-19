@@ -1,5 +1,6 @@
 import React from "react";
-import Botones from "./components/Botones"; // Importamos el componente
+import './styles.css'
+import Botones from "./components/Botones";
 
 function App() {
   return (
