@@ -1,8 +1,13 @@
+import { useNavigate } from "react-router-dom";
+
 import React, { useState } from "react";
 import "./Botones.css";
 import { usuarios } from "../users"; // Importamos los usuarios
 
+
+
 function Botones() {
+  const navigate = useNavigate();
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [username, setUsername] = useState("");
@@ -47,7 +52,8 @@ function Botones() {
       } else if (usuarioValido.rol.toLowerCase() === "profesor") {
         window.location.href = "/profesor.html";
       } else if (usuarioValido.rol.toLowerCase() === "administrador") {
-        window.location.href = "/admin.html";
+        navigate("/admin");
+
       } else {
         alert(`Bienvenido ${usuarioValido.username} (${usuarioValido.rol})`);
       }
