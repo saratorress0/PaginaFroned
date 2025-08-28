@@ -1,36 +1,36 @@
-/* Estilos generales para el body */
+
 body {
-  background-color: #9ec9f5; /* azul claro */
-  color: white;
+  background-color: #9ec9f5;
+  color: rgb(0, 0, 0);
   font-family: "Source Sans Pro", Arial, sans-serif;
   margin: 0;
   padding: 0;
 }
 
-/* Tipografías para encabezados */
+
 h1, h2, h3 {
   font-family: "Playfair Display", serif;
   font-weight: 700;
-  color: white;
+  color: rgb(255, 255, 255);
 }
 
-/* Botones adaptados al diseño azul oscuro */
+
 .boton {
-  background-color: #004a99; /* azul oscuro */
+  background-color: #003366; 
   color: white;
   border: none;
   width: 160px;
   padding: 12px 32px;
   font-weight: 600;
   font-family: "Playfair Display", serif;
-  border-radius: 20px; /* más redondeado */
+  border-radius: 20px; 
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.1s ease;
   text-align: center;
 }
 
 .boton:hover {
-  background-color: #003366; /* azul más oscuro */
+  background-color: #003366; 
   transform: translateY(-2px);
 }
 
@@ -38,7 +38,7 @@ h1, h2, h3 {
   transform: translateY(0);
 }
 
-/* Contenedor de botones */
+
 .contenedor-botones {
   display: flex;
   justify-content: space-around;
@@ -47,7 +47,6 @@ h1, h2, h3 {
   padding: 40px 20px;
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -63,7 +62,7 @@ h1, h2, h3 {
 }
 
 .modal-content {
-  background: #004a99; /* azul oscuro */
+  background: #004a99; 
   padding: 40px 30px;
   border-radius: 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
@@ -75,7 +74,7 @@ h1, h2, h3 {
   gap: 20px;
 }
 
-/* Botón cerrar modal */
+
 .cerrar-modal {
   position: absolute;
   top: 12px;
@@ -91,7 +90,7 @@ h1, h2, h3 {
   color: white;
 }
 
-/* Formulario login */
+
 .form-login {
   display: flex;
   flex-direction: column;
@@ -124,7 +123,7 @@ h1, h2, h3 {
   box-shadow: 0 0 5px #a4c3ff;
 }
 
-/* Animación fadeIn */
+
 @keyframes fadeIn {
   from {
     opacity: 0;

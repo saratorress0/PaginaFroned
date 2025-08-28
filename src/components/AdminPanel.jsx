@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 const AdminPanel = () => {
-  const [usuarios, setUsuarios] = useState([]);
+  const [usuarios, setUsuarios] = useState([]); 
 
   const obtenerUsuarios = async () => {
     try {
@@ -66,7 +66,7 @@ const AdminPanel = () => {
 
 
   useEffect(() => {
-    obtenerUsuarios(); // Cargar usuarios al iniciar
+    obtenerUsuarios(); 
   }, []);
 
   return (

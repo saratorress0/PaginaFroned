@@ -1,4 +1,3 @@
-// src/services/contacto.js
 import axios from 'axios'
 
 const baseUrl = '/api/contactanos'

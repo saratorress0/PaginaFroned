@@ -1,4 +1,4 @@
-// src/components/Bienvenida.jsx
+
 import React from "react";
 
 function Bienvenida() {

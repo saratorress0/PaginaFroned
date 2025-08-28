@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import React, { useState } from "react";
 import "./Botones.css";
-import { usuarios } from "../users"; // Importamos los usuarios
+import { usuarios } from "../users"; 
 
 
 
@@ -48,9 +48,9 @@ function Botones() {
     if (usuarioValido) {
       
       if (usuarioValido.rol.toLowerCase() === "estudiante") {
-        window.location.href = "/estudiante.html";
+        navigate("/estudiante");
       } else if (usuarioValido.rol.toLowerCase() === "profesor") {
-        window.location.href = "/profesor.html";
+        navigate("/profesor");
       } else if (usuarioValido.rol.toLowerCase() === "administrador") {
         navigate("/admin");
 
