@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import "./Estudiante.css";
 
 const materias = ["Matemáticas", "Lenguaje", "Ciencias", "Historia"];
 
@@ -11,30 +12,29 @@ function Estudiante() {
   };
 
   return (
-    <div style={{ padding: "40px", backgroundColor: "#9ec9f5", fontFamily: "Arial, sans-serif" }}>
-      <h1 style={{ color: "#000" }}>Bienvenido, Estudiante</h1>
-      <p>Aquí puedes ver tus materias, calificaciones, etc.</p>
+    <div className="contenedor-estudiante">
+      <div className="contenido-texto-estudiante">
+        <h1>Bienvenido, Estudiante</h1>
+        <p>Aquí puedes ver tus materias, calificaciones, etc.</p>
 
-      <div style={{ marginTop: "30px" }}>
-        {materias.map((materia, index) => (
-          <button
-            key={index}
-            onClick={() => irAMateria(materia)}
-            style={{
-              padding: "10px 20px",
-              margin: "10px",
-              fontSize: "16px",
-              cursor: "pointer",
-              backgroundColor: "#0d6efd",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px"
-            }}
-          >
-            {materia}
-          </button>
-        ))}
+        <div className="botones-materias">
+          {materias.map((materia, index) => (
+            <button
+              key={index}
+              onClick={() => irAMateria(materia)}
+              className="boton-materia"
+            >
+              {materia}
+            </button>
+          ))}
+        </div>
       </div>
+
+      <img
+        src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80"
+        alt="Estudiante estudiando"
+        className="imagen-estudiante"
+      />
     </div>
   );
 }
