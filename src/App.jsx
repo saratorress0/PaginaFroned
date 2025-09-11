@@ -23,6 +23,7 @@ function App() {
           <Route path="/profesor" element={<Profesor />} />
           <Route path="/estudiante/materia/:nombre" element={<MateriaDetalle />} />
           <Route path="/profesor/materia/:nombre" element={<MateriaGrados />} />
+          <Route path="/profesor/materia/:nombre/grado/:grado" element={<MateriaDetalle />} />
 
 
         </Routes>
