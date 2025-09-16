@@ -14,20 +14,12 @@ function MateriaDetalle() {
         Materia: {nombre.charAt(0).toUpperCase() + nombre.slice(1)}
         {grado && ` - Grado ${grado}`}
       </h1>
-      {esProfesor ? (
-        <>
-          <h2>Notas de {nombre} - Grado {grado}</h2>
-          <NotasTabla editable={true} />
-        </>
-      ) : (
-        <p>
-          Aquí podrás consultar tus calificaciones, asistencia y otra información.
-          {}
-          <NotasTabla editable={false} />
-        </p>
-      )}
+      
+      <NotasTabla editable={esProfesor} materia={nombre} grado={grado || "10"} />
+
     </div>
   );
 }
  
 export default MateriaDetalle;
+
