@@ -1,110 +1,152 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
-function NotasTabla({ editable, materia, grado }) {
-  const columnas = ["Examen 1", "Examen 2", "Examen Final", "H1", "H2", "H3", "H4", "Nota promediada"];
-  const [notas, setNotas] = useState([
-    { estudiante: "Juan Pérez", notas: ["", "", "", "", "", "", "", ""] },
-    { estudiante: "María Gómez", notas: ["", "", "", "", "", "", "", ""] },
-    { estudiante: "Carlos Ruiz", notas: ["", "", "", "", "", "", "", ""] },
-  ]);
+export default function NotasTabla({ editable = false, materia, grado }) {
 
-  // ✅ Cargar notas de la API
+  const columnas = [
+    { key: "examen1", label: "Examen 1" },
+    { key: "examen2", label: "Examen 2" },
+    { key: "examen_final", label: "Examen Final" },
+    { key: "h1", label: "H1" },
+    { key: "h2", label: "H2" },
+    { key: "h3", label: "H3" },
+    { key: "h4", label: "H4" },
+    { key: "promedio", label: "Nota promediada", readonly: true }
+  ];
+
+  const [rows, setRows] = useState([]); 
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
-    fetch(`/api/notas/${materia}/${grado}`)
-      .then((res) => res.json())
+    if (!materia || !grado) return;
+    setLoading(true);
+    // 1) obtener notas guardadas
+    fetch(`/api/notas/${encodeURIComponent(materia)}/${encodeURIComponent(grado)}`)
+      .then((r) => r.json())
       .then((data) => {
-        const estudiantesMap = {};
-        data.forEach((fila) => {
-          if (!estudiantesMap[fila.estudiante]) {
-            estudiantesMap[fila.estudiante] = Array(columnas.length).fill("");
-          }
-          const colIndex = columnas.indexOf(fila.columna);
-          if (colIndex !== -1) estudiantesMap[fila.estudiante][colIndex] = fila.nota;
-        });
-
-        const nuevos = Object.entries(estudiantesMap).map(([estudiante, notas]) => ({
-          estudiante,
-          notas,
-        }));
-
-        if (nuevos.length > 0) setNotas(nuevos);
+        if (Array.isArray(data) && data.length > 0) {
+         
+          const map = {};
+          data.forEach((r) => {
+            if (!map[r.estudiante]) map[r.estudiante] = Array(columnas.length).fill("");
+            const colIndex = columnas.findIndex((c) => c.key === r.columna);
+            if (colIndex >= 0) map[r.estudiante][colIndex] = r.nota;
+          });
+          const arr = Object.entries(map).map(([est, notas]) => ({ estudiante: est, notas }));
+          setRows(arr);
+          setLoading(false);
+        } else {
+          
+          fetch("/api/estudiantes")
+            .then((r) => r.json())
+            .then((estud) => {
+              const arr = estud.map((e) => ({
+                estudiante: e.nombre,
+                notas: Array(columnas.length).fill("")
+              }));
+              setRows(arr);
+            })
+            .catch(() => {
+              
+              setRows([
+                { estudiante: "Juan Pérez", notas: Array(columnas.length).fill("") },
+                { estudiante: "María Gómez", notas: Array(columnas.length).fill("") },
+                { estudiante: "Carlos Ruiz", notas: Array(columnas.length).fill("") }
+              ]);
+            })
+            .finally(() => setLoading(false));
+        }
       })
-      .catch((err) => console.error("Error cargando notas:", err));
+      .catch((err) => {
+        console.error("Error cargando notas:", err);
+        setLoading(false);
+      });
   }, [materia, grado]);
 
-  // ✅ Cambiar nota en la tabla
-  const handleNotaChange = (estIndex, colIndex, valor) => {
-    const nuevasNotas = [...notas];
-    nuevasNotas[estIndex].notas[colIndex] = valor;
-    setNotas(nuevasNotas);
-  };
-
-  // ✅ Guardar en la API
-  const guardarNotas = () => {
-    notas.forEach((fila) => {
-      const notasObj = {};
-      columnas.forEach((col, i) => {
-        if (i < columnas.length - 1) notasObj[col] = fila.notas[i];
-      });
-
-      fetch("/api/notas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          estudiante: fila.estudiante,
-          materia,
-          grado,
-          notas: notasObj,
-        }),
-      }).then((res) => res.json())
-        .then((msg) => console.log("Guardado:", msg))
-        .catch((err) => console.error("Error guardando:", err));
-    });
+  const handleChange = (rowIndex, colIndex, value) => {
+    const newRows = [...rows];
+    newRows[rowIndex].notas[colIndex] = value;
+    setRows(newRows);
   };
 
   const calcularPromedio = (notas) => {
-    const numeros = notas.map((n) => parseFloat(n)).filter((n) => !isNaN(n));
-    if (numeros.length === 0) return "-";
-    return (numeros.reduce((a, b) => a + b, 0) / numeros.length).toFixed(2);
+    const nums = notas
+      .slice(0, columnas.length - 1) 
+      .map((v) => parseFloat(v))
+      .filter((n) => !isNaN(n));
+    if (nums.length === 0) return "-";
+    const sum = nums.reduce((a, b) => a + b, 0);
+    return (sum / nums.length).toFixed(2);
   };
+
+  const guardarNotas = async () => {
+    setSaving(true);
+    
+    const estudiantesPayload = rows.map((r) => {
+      const notasObj = {};
+      columnas.forEach((col, i) => {
+        if (!col.readonly) {
+          notasObj[col.key] = r.notas[i] === "" ? null : r.notas[i];
+        }
+      });
+      return { estudiante: r.estudiante, notas: notasObj };
+    });
+
+    try {
+      const res = await fetch("/api/notas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ materia, grado, estudiantes: estudiantesPayload })
+      });
+      if (!res.ok) throw new Error("Error al guardar");
+      alert("Notas guardadas ✅");
+    } catch (err) {
+      console.error(err);
+      alert("Error guardando notas. Revisa la consola del servidor.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <p>Cargando notas...</p>;
+  if (!rows.length) return <p>No hay estudiantes / datos</p>;
 
   return (
     <div>
       <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "20px" }}>
         <thead>
-          <tr>
-            <th style={{ border: "1px solid #ccc", padding: "8px", background: "#0d2b45", color: "#fff" }}>Estudiante</th>
-            {columnas.map((col, i) => (
-              <th key={i} style={{ border: "1px solid #ccc", padding: "8px", background: "#0d2b45", color: "#fff" }}>
-                {col}
-              </th>
+          <tr style={{ background: "#0d2b45", color: "#fff" }}>
+            <th style={{ padding: 8, border: "1px solid #ccc" }}>Estudiante</th>
+            {columnas.map((c) => (
+              <th key={c.key} style={{ padding: 8, border: "1px solid #ccc" }}>{c.label}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {notas.map((fila, estIndex) => (
-            <tr key={estIndex}>
-              <td style={{ border: "1px solid #ccc", padding: "8px" }}>{fila.estudiante}</td>
-              {fila.notas.map((nota, colIndex) =>
-                colIndex === columnas.length - 1 ? (
-                  <td key={colIndex} style={{ border: "1px solid #ccc", padding: "8px", textAlign: "center" }}>
-                    {calcularPromedio(fila.notas.slice(0, -1))}
+          {rows.map((r, ri) => (
+            <tr key={ri}>
+              <td style={{ padding: 8, border: "1px solid #ccc" }}>{r.estudiante}</td>
+              {r.notas.map((nota, ci) => (
+                ci === columnas.length - 1 ? (
+                  <td key={ci} style={{ textAlign: "center", border: "1px solid #ccc", padding: 8 }}>
+                    {calcularPromedio(r.notas)}
                   </td>
                 ) : (
-                  <td key={colIndex} style={{ border: "1px solid #ccc", padding: "8px" }}>
+                  <td key={ci} style={{ textAlign: "center", border: "1px solid #ccc", padding: 8 }}>
                     {editable ? (
                       <input
                         type="number"
-                        value={nota}
-                        onChange={(e) => handleNotaChange(estIndex, colIndex, e.target.value)}
-                        style={{ width: "80px", padding: "5px", textAlign: "center" }}
+                        step="0.1"
+                        value={nota ?? ""}
+                        onChange={(e) => handleChange(ri, ci, e.target.value)}
+                        style={{ width: 80, padding: 6, textAlign: "center" }}
                       />
                     ) : (
-                      nota
+                      nota ?? ""
                     )}
                   </td>
                 )
-              )}
+              ))}
             </tr>
           ))}
         </tbody>
@@ -113,14 +155,13 @@ function NotasTabla({ editable, materia, grado }) {
       {editable && (
         <button
           onClick={guardarNotas}
-          style={{ marginTop: "15px", padding: "10px 20px", background: "#0d2b45", color: "#fff", border: "none", borderRadius: "5px" }}
+          disabled={saving}
+          style={{ marginTop: 16, padding: "8px 14px", background: "#0b60a6", color: "#fff", border: "none", borderRadius: 6 }}
         >
-          Guardar Notas
+          {saving ? "Guardando..." : "Guardar Notas"}
         </button>
       )}
     </div>
   );
 }
-
-export default NotasTabla;
 

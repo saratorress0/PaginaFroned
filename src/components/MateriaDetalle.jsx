@@ -15,7 +15,7 @@ function MateriaDetalle() {
         {grado && ` - Grado ${grado}`}
       </h1>
       
-      <NotasTabla editable={esProfesor} materia={nombre} grado={grado || "10"} />
+      <NotasTabla editable={esProfesor} materia={nombre} grado={grado || "9-1"} />
 
     </div>
   );
