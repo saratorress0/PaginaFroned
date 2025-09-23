@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export default function NotasTabla({ editable = false, materia, grado }) {
-
+export default function NotasTabla({ editable = false, materiaId, gradoId, materiaNombre, gradoNombre }) {
   const columnas = [
     { key: "examen1", label: "Examen 1" },
     { key: "examen2", label: "Examen 2" },
@@ -13,19 +12,21 @@ export default function NotasTabla({ editable = false, materia, grado }) {
     { key: "promedio", label: "Nota promediada", readonly: true }
   ];
 
-  const [rows, setRows] = useState([]); 
+  const [rows, setRows] = useState([]); // { estudiante, notas: [...] }
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!materia || !grado) return;
+    if (!materiaId || !gradoId) return;
     setLoading(true);
-    // 1) obtener notas guardadas
-    fetch(`/api/notas/${encodeURIComponent(materia)}/${encodeURIComponent(grado)}`)
+
+    // 1) pedir notas por id al backend
+    fetch(`/api/notas/${materiaId}/${gradoId}`)
       .then((r) => r.json())
       .then((data) => {
+        // data: [{ estudiante, columna, nota }, ...]
         if (Array.isArray(data) && data.length > 0) {
-         
+          // convertir a filas por estudiante
           const map = {};
           data.forEach((r) => {
             if (!map[r.estudiante]) map[r.estudiante] = Array(columnas.length).fill("");
@@ -36,7 +37,7 @@ export default function NotasTabla({ editable = false, materia, grado }) {
           setRows(arr);
           setLoading(false);
         } else {
-          
+          // si no hay notas guardadas, pedimos lista de estudiantes para crear filas vacías
           fetch("/api/estudiantes")
             .then((r) => r.json())
             .then((estud) => {
@@ -47,11 +48,10 @@ export default function NotasTabla({ editable = false, materia, grado }) {
               setRows(arr);
             })
             .catch(() => {
-              
+              // fallback si no hay endpoint de estudiantes
               setRows([
-                { estudiante: "Juan Pérez", notas: Array(columnas.length).fill("") },
-                { estudiante: "María Gómez", notas: Array(columnas.length).fill("") },
-                { estudiante: "Carlos Ruiz", notas: Array(columnas.length).fill("") }
+                { estudiante: "Pedro", notas: Array(columnas.length).fill("") },
+                { estudiante: "Ana", notas: Array(columnas.length).fill("") }
               ]);
             })
             .finally(() => setLoading(false));
@@ -61,7 +61,7 @@ export default function NotasTabla({ editable = false, materia, grado }) {
         console.error("Error cargando notas:", err);
         setLoading(false);
       });
-  }, [materia, grado]);
+  }, [materiaId, gradoId]);
 
   const handleChange = (rowIndex, colIndex, value) => {
     const newRows = [...rows];
@@ -71,7 +71,7 @@ export default function NotasTabla({ editable = false, materia, grado }) {
 
   const calcularPromedio = (notas) => {
     const nums = notas
-      .slice(0, columnas.length - 1) 
+      .slice(0, columnas.length - 1)
       .map((v) => parseFloat(v))
       .filter((n) => !isNaN(n));
     if (nums.length === 0) return "-";
@@ -80,8 +80,12 @@ export default function NotasTabla({ editable = false, materia, grado }) {
   };
 
   const guardarNotas = async () => {
+    if (!materiaId || !gradoId) {
+      alert("Faltan materia o grado (id).");
+      return;
+    }
     setSaving(true);
-    
+
     const estudiantesPayload = rows.map((r) => {
       const notasObj = {};
       columnas.forEach((col, i) => {
@@ -96,15 +100,40 @@ export default function NotasTabla({ editable = false, materia, grado }) {
       const res = await fetch("/api/notas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ materia, grado, estudiantes: estudiantesPayload })
+        body: JSON.stringify({
+          materiaId,
+          gradoId,
+          estudiantes: estudiantesPayload
+        })
       });
-      if (!res.ok) throw new Error("Error al guardar");
+      
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Error guardando");
+      }
+
       alert("Notas guardadas ✅");
+      // recargar notas desde el servidor para mostrar lo guardado
+      setLoading(true);
+      const r2 = await fetch(`/api/notas/${materiaId}/${gradoId}`);
+      const data = await r2.json();
+      if (Array.isArray(data) && data.length > 0) {
+        const map = {};
+        data.forEach((r) => {
+          if (!map[r.estudiante]) map[r.estudiante] = Array(columnas.length).fill("");
+          const colIndex = columnas.findIndex((c) => c.key === r.columna);
+          if (colIndex >= 0) map[r.estudiante][colIndex] = r.nota;
+        });
+        const arr = Object.entries(map).map(([est, notas]) => ({ estudiante: est, notas }));
+        setRows(arr);
+      }
     } catch (err) {
       console.error(err);
       alert("Error guardando notas. Revisa la consola del servidor.");
     } finally {
       setSaving(false);
+      setLoading(false);
     }
   };
 
@@ -113,7 +142,7 @@ export default function NotasTabla({ editable = false, materia, grado }) {
 
   return (
     <div>
-      <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "20px" }}>
+      <table style={{ borderCollapse: "collapse", width: "100%", marginTop: 20 }}>
         <thead>
           <tr style={{ background: "#0d2b45", color: "#fff" }}>
             <th style={{ padding: 8, border: "1px solid #ccc" }}>Estudiante</th>
@@ -164,4 +193,3 @@ export default function NotasTabla({ editable = false, materia, grado }) {
     </div>
   );
 }
-
