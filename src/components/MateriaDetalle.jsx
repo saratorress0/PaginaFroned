@@ -11,34 +11,52 @@ function MateriaDetalle() {
   const [gradoId, setGradoId] = useState(null);
   const [loadingIds, setLoadingIds] = useState(true);
 
+  // 1) Log de estado general del componente (se ejecuta en cada render)
+  console.log("🔎 MateriaDetalle render:", {
+    nombre,
+    grado,
+    materiaId,
+    gradoId,
+    loadingIds,
+  });
+
   useEffect(() => {
     if (!nombre) return;
     setLoadingIds(true);
+
     const materiaName = nombre;
     const gradoName = grado || "9-1";
 
     async function fetchIds() {
-      try {
-        const BASE = "http://localhost:3003"; // <- usa el puerto de tu backend
-        // pedir id de materia al backend (usa el BASE)
-        const mRes = await fetch(`${BASE}/api/materias/name/${encodeURIComponent(materiaName)}`);
-        if (mRes.ok) {
-          const mData = await mRes.json();
-          setMateriaId(mData.id);
-        } else {
-          console.warn("Materia no encontrada:", materiaName);
-        }
+      // 2) Log antes de empezar las peticiones
+      console.log("🚀 fetchIds arrancó con:", { materiaName, gradoName });
 
-        // pedir id de grado al backend (usa el BASE)
-        const gRes = await fetch(`${BASE}/api/grados/name/${encodeURIComponent(gradoName)}`);
-        if (gRes.ok) {
-          const gData = await gRes.json();
-          setGradoId(gData.id);
-        } else {
-          console.warn("Grado no encontrado:", gradoName);
-        }
+      try {
+        // 3) Log justo antes de llamar al endpoint de materias
+        console.log("🧩 Llamando a GET /api/materias/name/:", materiaName);
+        const mRes = await fetch(
+          `/api/materias/name/${encodeURIComponent(materiaName)}`
+        );
+        // 4) Log del status de respuesta
+        console.log("📥 Status materia:", mRes.status);
+        const mData = await mRes.json();
+        // 5) Log del JSON recibido
+        console.log("📄 JSON materia:", mData);
+        if (mRes.ok) setMateriaId(mData.id);
+
+        // 6) Log justo antes de llamar al endpoint de grados
+        console.log("🧩 Llamando a GET /api/grados/name/:", gradoName);
+        const gRes = await fetch(
+          `/api/grados/name/${encodeURIComponent(gradoName)}`
+        );
+        // 7) Log del status de respuesta
+        console.log("📥 Status grado:", gRes.status);
+        const gData = await gRes.json();
+        // 8) Log del JSON recibido
+        console.log("📄 JSON grado:", gData);
+        if (gRes.ok) setGradoId(gData.id);
       } catch (err) {
-        console.error("Error obteniendo ids:", err);
+        console.error("❌ Error en fetchIds:", err);
       } finally {
         setLoadingIds(false);
       }
@@ -47,7 +65,8 @@ function MateriaDetalle() {
     fetchIds();
   }, [nombre, grado]);
 
-  if (loadingIds) return <p style={{ padding: 40 }}>Cargando información...</p>;
+  if (loadingIds)
+    return <p style={{ padding: 40 }}>Cargando información...</p>;
   if (!materiaId || !gradoId) {
     return (
       <div style={{ padding: 40 }}>
@@ -68,13 +87,12 @@ function MateriaDetalle() {
         editable={esProfesor}
         materiaId={materiaId}
         gradoId={gradoId}
-        materiaNombre={nombre}
-        gradoNombre={grado}
       />
     </div>
   );
 }
 
 export default MateriaDetalle;
+
 
 
